@@ -6,17 +6,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================  Virtual DOM Component Class Prototype  ========================= 
     const ROOT = document.getElementById('ROOT');
 
-
+    let _globalVDOMIndex = {};
+    _globalVDOMIndex = document.childNodes.push();
 
 
     // THIS NEEDS WORK. If the component is a string, then it won't have the property 'id' (or any properties).
     // Mostly trying to minimize actual DOM updates where possible.
     const updateDOM = (component, cb) => {
         let target = document.querySelectorAll(component.id);
-        if (component === String(component)) {
-            target.innerHTML = component;       /* If the component returns only a string of HTML code,
-                                                then just add the string to the innerHTML for performance reasons.*/
-        }
+
+        // if (component === String(component)) {
+        //     target.innerHTML = component;       /* If the component returns only a string of HTML code,
+        //                                         then just add the string to the innerHTML for performance reasons.*/
+        // }
+
         if (component instanceof Object) {
             let childArray = [];
             target.children.forEach((e) => {
@@ -48,12 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (callback) callback(this.state);
             return;
         }
-        // Not sure if this is the right set of functions/args
+        // Not sure if this is the right set of functions/args..
+        // Takes a string of HTML code (unsanitized), calls the global update DOM function,
+        // which returns a callback, which should return the new component
         render(htmlString) {
             let cbfn = (x) => {return x}
-            let component = {id: this.id, component: htmlString}
-            updateDOM(component, cbfn);
-            cbfn(cb);
+            updateDOM({id: this.id, htmlString: htmlString, state: this.state, props: this.props}, cbfn);
+            cbfn(renderedComponent);
         }
         createUUID() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
